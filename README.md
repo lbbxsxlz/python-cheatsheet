@@ -520,19 +520,19 @@ shuffle(<list>)
 
 ### Bin, Hex
 ```python
-<int>        = ±0b<bin>                  # Or: ±0x<hex>
-<int>        = int('±<bin>', 2)          # Or: int('±<hex>', 16)
-<int>        = int('±0b<bin>', 0)        # Or: int('±0x<hex>', 0)
-'[-]0b<bin>' = bin(<int>)                # Or: hex(<int>)
+<int> = ±0b<bin>                         # Or: ±0x<hex>
+<int> = int('±<bin>', 2)                 # Or: int('±<hex>', 16)
+<int> = int('±0b<bin>', 0)               # Or: int('±0x<hex>', 0)
+<str> = bin(<int>)                       # Returns '[-]0b<bin>'.
 ```
 
 ### Bitwise Operators
 ```python
-<int>        = <int> & <int>             # And
-<int>        = <int> | <int>             # Or
-<int>        = <int> ^ <int>             # Xor (0 if both bits equal)
-<int>        = <int> << n_bits           # Shift left (>> for right)
-<int>        = ~<int>                    # Not (also: -<int> - 1)
+<int> = <int> & <int>                    # And
+<int> = <int> | <int>                    # Or
+<int> = <int> ^ <int>                    # Xor (0 if both bits equal)
+<int> = <int> << n_bits                  # Shift left (>> for right)
+<int> = ~<int>                           # Not (also: -<int> - 1)
 ```
 
 
@@ -2441,7 +2441,7 @@ retention=<int>|<datetime.timedelta>|<str>
 
 Scraping
 --------
-#### Scrapes Python's URL, version number and logo from Wikipedia page:
+#### Scrapes Python's URL, version number and logo from its Wikipedia page:
 ```python
 # $ pip3 install requests beautifulsoup4
 import requests, sys
@@ -2536,7 +2536,7 @@ duration = perf_counter() - start_time
 ### Timing a Snippet
 ```python
 >>> from timeit import timeit
->>> timeit('"-".join(str(a) for a in range(100))',
+>>> timeit('"-".join(str(i) for i in range(100))',
 ...        number=10000, globals=globals(), setup='pass')
 0.34986
 ```
@@ -2587,7 +2587,7 @@ with PyCallGraph(drawer):
 
 NumPy
 -----
-**Array manipulation mini-language. It can run up to one hundred times faster than the equivalent Python code.**
+**Array manipulation mini-language. It can run up to one hundred times faster than the equivalent Python code. An even faster alternative that runs on a GPU is called CuPy.**
 
 ```python
 # $ pip3 install numpy
@@ -2939,7 +2939,7 @@ while all(event.type != pg.QUIT for event in pg.event.get()):
 ```
 
 ```python
-<bool> = <Rect>.collidepoint((x, y))            # Tests if a point is inside a rectangle.
+<bool> = <Rect>.collidepoint((x, y))            # Tests if a point is inside the rectangle.
 <bool> = <Rect>.colliderect(<Rect>)             # Tests if two rectangles overlap.
 <int>  = <Rect>.collidelist(<list_of_Rect>)     # Returns index of first colliding Rect or -1.
 <list> = <Rect>.collidelistall(<list_of_Rect>)  # Returns indexes of all colliding Rects.
@@ -3119,7 +3119,7 @@ Name: a, dtype: int64
 <Sr> = <Sr>.rank/diff/cumsum/ffill/interpl()  # Or: <Sr>.agg/transform(<trans_func>)
 <Sr> = <Sr>.fillna(<el>)                      # Or: <Sr>.apply/agg/transform/map(<map_func>)
 ```
-* **The way `'aggregate()'` and `'transform()'` find out whether a function accepts an element or the whole Series is by passing it a single value at first and if it raises an error, then they pass it the whole Series.**
+* **The way `'aggregate()'` and `'transform()'` find out whether the passed function accepts an element or the whole Series is by passing it a single value at first and if it raises an error, then they pass it the whole Series.**
 
 ```python
 >>> sr = Series([1, 2], index=['x', 'y'])
@@ -3201,7 +3201,7 @@ c  6  7
 
 ```text
 +------------------------+---------------+------------+------------+--------------------------+
-|        how/join        |    'outer'    |   'inner'  |   'left'   |       description        |
+|                        |    'outer'    |   'inner'  |   'left'   |       Description        |
 +------------------------+---------------+------------+------------+--------------------------+
 | l.merge(r, on='y',     |    x   y   z  | x   y   z  | x   y   z  | Joins/merges on column.  |
 |            how=…)      | 0  1   2   .  | 3   4   5  | 1   2   .  | Also accepts left_on and |
@@ -3377,19 +3377,22 @@ plotly.express.line(df, x='Date', y='Total Deaths per Million', color='Continent
 
 ```python
 # $ pip3 install pandas plotly
-import pandas, datetime
+import pandas as pd
 import plotly.graph_objects as go
+import datetime
 
 def main():
-    display_data(wrangle_data(*scrape_data()))
+    data = scrape_data()
+    df = wrangle_data(*data)
+    display_data(df)
 
 def scrape_data():
     def scrape_yahoo(id_):
         BASE_URL = 'https://query1.finance.yahoo.com/v7/finance/download/'
-        now  = int(datetime.datetime.now().timestamp())
-        url  = f'{BASE_URL}{id_}?period1=1579651200&period2={now}&interval=1d&events=history'
-        return pandas.read_csv(url, usecols=['Date', 'Close']).set_index('Date').Close 
-    covid = pd.read_csv('https://covid.ourworldindata.org/data/owid-covid-data.csv', 
+        now = int(datetime.datetime.now().timestamp())
+        url = f'{BASE_URL}{id_}?period1=1579651200&period2={now}&interval=1d&events=history'
+        return pd.read_csv(url, usecols=['Date', 'Close']).set_index('Date').Close
+    covid = pd.read_csv('https://covid.ourworldindata.org/data/owid-covid-data.csv',
                         usecols=['date', 'total_cases'])
     covid = covid.groupby('date').sum()
     dow, gold, bitcoin = [scrape_yahoo(id_) for id_ in ('^DJI', 'GC=F', 'BTC-USD')]
@@ -3397,12 +3400,12 @@ def scrape_data():
     return covid, dow, gold, bitcoin
 
 def wrangle_data(covid, dow, gold, bitcoin):
-    df = pandas.concat([covid, dow, gold, bitcoin], axis=1)
+    df = pd.concat([dow, gold, bitcoin], axis=1)
+    df = df.sort_index().interpolate()
+    df = df.rolling(10, min_periods=1, center=True).mean()
     df = df.loc['2020-02-23':].iloc[:-2]
-    df = df.interpolate()
-    df.iloc[:, 1:] = df.rolling(10, min_periods=1, center=True).mean().iloc[:, 1:]
-    df.iloc[:, 1:] = df.iloc[:, 1:] / df.iloc[0, 1:] * 100
-    return df
+    df = (df / df.iloc[0]) * 100
+    return pd.concat([covid, df], axis=1, join='inner')
 
 def display_data(df):
     def get_trace(col_name):
@@ -3478,7 +3481,7 @@ $ pyinstaller script.py --add-data '<path>:.'  # Adds file to the root of the ex
 from collections import namedtuple
 from dataclasses import make_dataclass
 from enum import Enum
-from sys import argv
+from sys import argv, exit
 import re
 
 
